@@ -9,6 +9,7 @@
 #else
 
 #include <SDL2/SDL.h>
+#include <core/SkTextBlob.h>
 
 #endif
 
@@ -24,6 +25,33 @@ struct RGBA {
     Uint32 amask = 0xff000000;
 };
 
+void draw1(SkCanvas* canvas) {
+    SkTextBlobBuilder textBlobBuilder;
+    const char bunny[] = "/(^x^)\\";
+    const int len = sizeof(bunny) - 1;
+    uint16_t glyphs[len];
+    SkPaint paint;
+    paint.textToGlyphs(bunny, len, glyphs);
+    paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+    int runs[] = { 3, 1, 3 };
+    SkPoint textPos = { 20, 50 };
+    int glyphIndex = 0;
+    for (auto runLen : runs) {
+        paint.setTextSize(1 == runLen ? 20 : 50);
+        const SkTextBlobBuilder::RunBuffer& run =
+                textBlobBuilder.allocRun(paint, runLen, textPos.fX, textPos.fY);
+        memcpy(run.glyphs, &glyphs[glyphIndex], sizeof(glyphs[0]) * runLen);
+        textPos.fX += paint.measureText(&glyphs[glyphIndex], sizeof(glyphs[0]) * runLen, nullptr);
+        glyphIndex += runLen;
+    }
+    sk_sp<const SkTextBlob> blob = textBlobBuilder.make();
+    paint.reset();
+    canvas->drawTextBlob(blob.get(), 0, 0, paint);
+    paint.setStyle(SkPaint::kStroke_Style);
+    canvas->drawRect(blob->bounds(), paint);
+}
+
+
 //创建SkBitmap对象并在Bitmap上绘制
 SkBitmap draw(int w, int h) {
     //声明
@@ -34,6 +62,9 @@ SkBitmap draw(int w, int h) {
     bitmap.allocPixels();
     //创建画布
     SkCanvas canvas(bitmap);
+//    SkCanvas *canvas1;
+//    draw1(canvas1);
+
     //创建画笔
     SkPaint paint;
     //设置画布颜色
@@ -50,6 +81,7 @@ SkBitmap draw(int w, int h) {
     paint.setTextSize(60);
     //绘制字体
     canvas.drawString("Hello Skia", 300, 150, paint);
+
     //返回SkBitmap对象
     return bitmap;
 }
@@ -61,6 +93,8 @@ SDL_Rect create_rect(SDL_Surface *surface) {
     //返回SDL_Rect对象
     return src;
 }
+
+
 
 //程序的入口点
 int main(int args, char *argv[]) {
@@ -97,7 +131,7 @@ int main(int args, char *argv[]) {
     //通过SDL_Surface创建矩形
     rect = create_rect(surface);
     //创建渲染器
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
     //清理渲染器
     SDL_RenderClear(renderer);
     //创建纹理
@@ -120,4 +154,5 @@ int main(int args, char *argv[]) {
     SDL_Quit();
     //程序退出
     return 0;
+
 }
