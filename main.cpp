@@ -2,6 +2,8 @@
 #include <core/SkCanvas.h>
 #include <core/SkTypeface.h>
 
+#include <cstdio>
+
 #ifdef _WIN32
 
 #include <SDL.h>
@@ -143,16 +145,17 @@ int main(int args, char *argv[]) {
     //延时5秒钟
     SDL_Delay(5000);
     //释放表面
-    SDL_FreeSurface(surface);
+    //SDL_FreeSurface(surface);
     //释放纹理
-    SDL_DestroyTexture(texture);
+    //SDL_DestroyTexture(texture);
     //释放渲染器
-    SDL_DestroyRenderer(renderer);
+    //SDL_DestroyRenderer(renderer);
     //释放窗口
-    SDL_DestroyWindow(window);
+    //SDL_DestroyWindow(window);
     //结束SDL
-    SDL_Quit();
+    //SDL_Quit();
+
     //程序退出
-    return 0;
+    return std::getchar();;
 
 }
